@@ -29,7 +29,7 @@ exports.up = (pgm) => {
     },
   });
 
-  pgm.addConstraint('follows', 'fk_follower_user', {
+  pgm.addConstraint('follows', 'fk_follows_follower_id', {
     foreignKeys: {
       columns: 'follower_id',
       references: 'users(id)',
@@ -37,7 +37,7 @@ exports.up = (pgm) => {
     },
   });
 
-  pgm.addConstraint('follows', 'fk_following_user', {
+  pgm.addConstraint('follows', 'fk_follows_following_id', {
     foreignKeys: {
       columns: 'following_id',
       references: 'users(id)',
