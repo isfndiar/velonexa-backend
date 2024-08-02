@@ -7,6 +7,8 @@ import { ValidationExceptionFilter } from './common/filters/validation-exception
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { AuthGuard } from './common/guards/auth.guard';
+import { MulterModule } from '@nestjs/platform-express';
+import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { AuthGuard } from './common/guards/auth.guard';
       inject: [ConfigService],
       global: true,
     }),
+    MulterModule,
+    SupabaseModule,
   ],
   controllers: [],
   providers: [

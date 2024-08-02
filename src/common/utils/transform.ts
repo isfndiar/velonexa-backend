@@ -31,3 +31,8 @@ export const mapUserToModel = ({
   createdAt: created_at,
   updatedAt: updated_at,
 });
+
+export const columnMapUpdate: { [key: string]: string } = {
+  profileImage: 'profile_image',
+  phoneNumber: 'phone_number',
+};

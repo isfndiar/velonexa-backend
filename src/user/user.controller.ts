@@ -1,15 +1,31 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserCreateDto, UserLoginDto } from './dto/user';
 import { WebResponse } from 'src/model/web.model';
 import { UserLoginResponse } from './dto/user-login';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthSkip } from 'src/common/decorator/metadata';
-import { UserCurrentResponse, UserRequest } from './dto/user-current';
+import { UserCurrentResponse } from './dto/user-current';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerProfileOptions } from 'src/common/utils/multer';
+import { SupabaseService } from 'src/supabase/supabase.service';
+import { UserUpdateDto } from './dto/user-update';
+import { UserAuth } from 'src/model/user.model';
 
 @Controller('/users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @Get()
   @AuthSkip()
@@ -51,7 +67,7 @@ export class UserController {
 
   @Get('/me')
   async userCurrent(
-    @Auth() user: UserRequest,
+    @Auth() user: UserAuth,
   ): Promise<WebResponse<UserCurrentResponse>> {
     const data = await this.userService.getCurrentUser(user.username);
     return {
@@ -59,5 +75,24 @@ export class UserController {
       data: data,
       message: 'succes get current user',
     };
+  }
+
+  @Patch('/me/settings')
+  @UseInterceptors(FileInterceptor('profileImage', multerProfileOptions))
+  async updateProfile(
+    @Auth() user: UserAuth,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() userData: UserUpdateDto,
+  ): Promise<WebResponse<object>> {
+    try {
+      await this.userService.updateCurrent(user, userData, file);
+      return {
+        success: true,
+        message: 'Update success',
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }

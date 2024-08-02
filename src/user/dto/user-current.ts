@@ -4,7 +4,3 @@ export class UserCurrentResponse {
   verify: string;
   name: string;
 }
-
-export class UserRequest {
-  username: string;
-}

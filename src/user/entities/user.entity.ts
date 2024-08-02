@@ -20,6 +20,23 @@ export class UserEntity {
   }
 }
 
+export class UserUpdateEntity {
+  id?: string;
+  username?: string;
+  name?: string;
+  bio?: string;
+  email?: string;
+  password?: string;
+  gender?: string;
+  profileImage?: string;
+  phoneNumber?: string;
+  isPrivate?: boolean;
+
+  constructor(props: Partial<UserEntity>) {
+    Object.assign(this, props);
+  }
+}
+
 export class UserCreateEntity {
   id: string;
   username: string;

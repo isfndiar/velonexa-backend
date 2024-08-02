@@ -1,13 +1,17 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PoolClient } from 'pg';
-import { UserCreateEntity, UserEntity } from './entities/user.entity';
-import { mapUserToModel } from 'src/common/utils/transform';
+import {
+  UserCreateEntity,
+  UserEntity,
+  UserUpdateEntity,
+} from './entities/user.entity';
+import { columnMapUpdate, mapUserToModel } from 'src/common/utils/transform';
 
 @Injectable()
 export class UserRepository {
   constructor() {}
 
-  async createUser(client: PoolClient, user: UserCreateEntity): Promise<void> {
+  async create(client: PoolClient, user: UserCreateEntity): Promise<void> {
     const query = {
       text: `INSERT INTO users(id, username, email, password) VALUES ($1, $2, $3, $4)`,
       values: [user.id, user.username, user.email, user.password],
@@ -16,7 +20,7 @@ export class UserRepository {
     await client.query(query);
   }
 
-  async getCountUserByUsername(
+  async getCountByUsername(
     client: PoolClient,
     username: string,
   ): Promise<number> {
@@ -29,12 +33,12 @@ export class UserRepository {
     return result.rowCount;
   }
 
-  async getUserByUsername(
+  async getByUsername(
     client: PoolClient,
     username: string,
   ): Promise<UserEntity> {
     const query = {
-      text: `SELECT username, password FROM users WHERE username = $1`,
+      text: `SELECT id, username, password FROM users WHERE username = $1`,
       values: [username],
     };
 
@@ -47,7 +51,7 @@ export class UserRepository {
     return new UserEntity(result.rows[0]);
   }
 
-  async getCountUserByEmail(client: PoolClient, email: string) {
+  async getCountByEmail(client: PoolClient, email: string) {
     const query = {
       text: `SELECT email FROM users WHERE email = $1`,
       values: [email],
@@ -57,9 +61,9 @@ export class UserRepository {
     return result.rowCount;
   }
 
-  async getCurrentUserByUsername(client: PoolClient, username: string) {
+  async getCurrentByUsername(client: PoolClient, username: string) {
     const query = {
-      text: `SELECT username, name, verify, profile_image FROM users WHERE username = $1`,
+      text: `SELECT id, username, name, verify, profile_image FROM users WHERE username = $1`,
       values: [username],
     };
 
@@ -71,5 +75,28 @@ export class UserRepository {
     const user = mapUserToModel(result.rows[0]);
 
     return new UserEntity(user);
+  }
+
+  async updateById(client: PoolClient, users: UserUpdateEntity) {
+    const { id, ...data } = users;
+    const setClauses = [];
+    const values = [];
+    let i = 1;
+    for (const [key, value] of Object.entries(data)) {
+      const column = columnMapUpdate[key] || key;
+      setClauses.push(`${column} = $${i}`);
+      values.push(value);
+      i++;
+    }
+    if (setClauses.length == 0) {
+      throw new HttpException('No fields to update', 400);
+    }
+    values.push(id);
+    const query = {
+      text: `UPDATE USERS SET ${setClauses.join(', ')} WHERE id = $${i}`,
+      values: values,
+    };
+
+    await client.query(query);
   }
 }
