@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import {
   UserCreateEntity,
   UserEntity,
+  UserFollowsEntity,
   UserUpdateEntity,
 } from './entities/user.entity';
 import { columnMapUpdate, mapUserToModel } from 'src/common/utils/transform';
@@ -45,7 +46,7 @@ export class UserRepository {
     const result = await client.query(query);
 
     if (!result.rowCount) {
-      throw new HttpException('Password or Username is wrong', 404);
+      return undefined;
     }
 
     return new UserEntity(result.rows[0]);
@@ -95,6 +96,15 @@ export class UserRepository {
     const query = {
       text: `UPDATE USERS SET ${setClauses.join(', ')} WHERE id = $${i}`,
       values: values,
+    };
+
+    await client.query(query);
+  }
+
+  async follows(client: PoolClient, follows: UserFollowsEntity) {
+    const query = {
+      text: `INSERT INTO follows (follower_id, following_id) VALUES ( $1, $2)`,
+      values: [follows.followerId, follows.followingId],
     };
 
     await client.query(query);

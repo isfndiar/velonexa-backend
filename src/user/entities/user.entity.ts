@@ -37,6 +37,11 @@ export class UserUpdateEntity {
   }
 }
 
+export class UserFollowsEntity {
+  followerId: string;
+  followingId: string;
+}
+
 export class UserCreateEntity {
   id: string;
   username: string;
