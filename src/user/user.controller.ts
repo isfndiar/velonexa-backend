@@ -99,11 +99,11 @@ export class UserController {
     @Param('username') username: string,
   ): Promise<WebResponse<object>> {
     try {
-      this.userService.followsByUsername(user, username);
+      const message = await this.userService.followsByUsername(user, username);
       return {
         success: true,
         data: {},
-        message: 'Succes follow user',
+        message: message,
       };
     } catch (error) {}
   }

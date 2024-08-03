@@ -203,7 +203,7 @@ export class UserService {
     }
   }
 
-  async followsByUsername(user: UserAuth, username: string) {
+  async followsByUsername(user: UserAuth, username: string): Promise<string> {
     const client = await this.dbClient.startTransaction();
     try {
       const following = await this.userRepository.getByUsername(
@@ -220,8 +220,16 @@ export class UserService {
         followingId: following.id,
       };
 
-      await this.userRepository.follows(client, follows);
-      await this.dbClient.commitTransaction(client);
+      const isFollow = await this.userRepository.isFollow(client, follows);
+      if (isFollow) {
+        await this.userRepository.unFollow(client, follows);
+        await this.dbClient.commitTransaction(client);
+        return 'succes unfollow user';
+      } else {
+        await this.userRepository.follow(client, follows);
+        await this.dbClient.commitTransaction(client);
+        return 'succes follow user';
+      }
     } catch (error) {
       await this.dbClient.rollbackTransaction(client);
       throw error;
