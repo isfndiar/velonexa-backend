@@ -1,7 +1,11 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { DATABASE_CLIENT } from 'src/database/database';
 import { UserRepository } from './user.repository';
-import { UserCreateEntity, UserUpdateEntity } from './entities/user.entity';
+import {
+  UserCreateEntity,
+  UserFollowsEntity,
+  UserUpdateEntity,
+} from './entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { DatabaseClientPostgre } from 'src/database/postgre/postgre.service';
 import { UserCreateDto, UserLoginDto } from './dto/user';
@@ -73,6 +77,10 @@ export class UserService {
         client,
         user.username,
       );
+
+      if (userCurrent == undefined) {
+        throw new HttpException('Password or Username is wrong', 404);
+      }
 
       const passwordConfirm = await bcrypt.compare(
         user.password,
@@ -189,6 +197,39 @@ export class UserService {
 
       await this.userRepository.updateById(client, data);
       await this.dbClient.commitTransaction(client);
+    } catch (error) {
+      await this.dbClient.rollbackTransaction(client);
+      throw error;
+    }
+  }
+
+  async followsByUsername(user: UserAuth, username: string): Promise<string> {
+    const client = await this.dbClient.startTransaction();
+    try {
+      const following = await this.userRepository.getByUsername(
+        client,
+        username,
+      );
+
+      if (following == undefined) {
+        throw new HttpException('User not found', 404);
+      }
+
+      const follows: UserFollowsEntity = {
+        followerId: user.id,
+        followingId: following.id,
+      };
+
+      const isFollow = await this.userRepository.isFollow(client, follows);
+      if (isFollow) {
+        await this.userRepository.unFollow(client, follows);
+        await this.dbClient.commitTransaction(client);
+        return 'succes unfollow user';
+      } else {
+        await this.userRepository.follow(client, follows);
+        await this.dbClient.commitTransaction(client);
+        return 'succes follow user';
+      }
     } catch (error) {
       await this.dbClient.rollbackTransaction(client);
       throw error;

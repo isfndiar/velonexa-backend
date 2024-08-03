@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   UploadedFile,
@@ -16,16 +17,12 @@ import { AuthSkip } from 'src/common/decorator/metadata';
 import { UserCurrentResponse } from './dto/user-current';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerProfileOptions } from 'src/common/utils/multer';
-import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserUpdateDto } from './dto/user-update';
 import { UserAuth } from 'src/model/user.model';
 
 @Controller('/users')
 export class UserController {
-  constructor(
-    private userService: UserService,
-    private readonly supabaseService: SupabaseService,
-  ) {}
+  constructor(private userService: UserService) {}
 
   @Get()
   @AuthSkip()
@@ -94,5 +91,20 @@ export class UserController {
     } catch (error) {
       throw error;
     }
+  }
+
+  @Post('/:username/follows')
+  async follows(
+    @Auth() user: UserAuth,
+    @Param('username') username: string,
+  ): Promise<WebResponse<object>> {
+    try {
+      const message = await this.userService.followsByUsername(user, username);
+      return {
+        success: true,
+        data: {},
+        message: message,
+      };
+    } catch (error) {}
   }
 }
