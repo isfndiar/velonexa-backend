@@ -18,6 +18,7 @@ import { UserCurrentResponse } from './dto/user-current';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerProfileOptions } from 'src/common/utils/multer';
 import { UserUpdateDto } from './dto/user-update';
+import { UserDetailResponse } from './dto/user-detail';
 import { UserAuth } from 'src/model/user.model';
 import { UserGetFollowingResponse } from './dto/user-get-following';
 
@@ -141,5 +142,16 @@ export class UserController {
     } catch (error) {
       throw error;
     }
+  }
+  @Get('/me/settings')
+  async detailUser(
+    @Auth() user: UserAuth,
+  ): Promise<WebResponse<UserDetailResponse>> {
+    const data = await this.userService.getDetailUser(user);
+    return {
+      success: true,
+      data: data,
+      message: 'succes get Detail user',
+    };
   }
 }
