@@ -99,4 +99,19 @@ export class UserRepository {
 
     await client.query(query);
   }
+  async getDetailUser(client: PoolClient, username: string) {
+    const query = {
+      text: `SELECT id, username, name, verify, profile_image, bio, email, gender FROM users WHERE username = $1`,
+      values: [username],
+    };
+
+    const result = await client.query(query);
+
+    if (!result.rowCount) {
+      throw new HttpException('user not found', 404);
+    }
+    const user = mapUserToModel(result.rows[0]);
+
+    return new UserEntity(user);
+  }
 }

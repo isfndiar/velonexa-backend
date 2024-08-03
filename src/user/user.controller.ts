@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerProfileOptions } from 'src/common/utils/multer';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserUpdateDto } from './dto/user-update';
+import { UserDetailResponse } from './dto/user-detail';
 import { UserAuth } from 'src/model/user.model';
 
 @Controller('/users')
@@ -94,5 +95,17 @@ export class UserController {
     } catch (error) {
       throw error;
     }
+  }
+
+  @Get('/me/settings')
+  async detailUser(
+    @Auth() user: UserAuth,
+  ): Promise<WebResponse<UserDetailResponse>> {
+    const data = await this.userService.getDetailUser(user.username, );
+    return {
+      success: true,
+      data: data,
+      message: 'succes get Detail user',
+    };
   }
 }

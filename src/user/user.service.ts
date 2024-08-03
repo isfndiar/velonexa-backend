@@ -13,6 +13,7 @@ import { UserUpdateDto } from './dto/user-update';
 import { extname } from 'path';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserAuth } from 'src/model/user.model';
+import { UserDetailResponse } from './dto/user-detail';
 
 @Injectable()
 export class UserService {
@@ -193,5 +194,30 @@ export class UserService {
       await this.dbClient.rollbackTransaction(client);
       throw error;
     }
+    
   }
+  async getDetailUser(username: string): Promise<UserDetailResponse> {
+    const client = await this.dbClient.startTransaction();
+    try {
+      const user = await this.userRepository.getDetailUser(
+        client,
+        username,
+      );
+
+      await this.dbClient.commitTransaction(client);
+      return {
+        username: user.username,
+        name: user.name ?? '',
+        profileImage: user.profileImage ?? '',
+        verify: user.verify,
+        bio: user.bio ?? '',
+        email: user.email ?? '',
+        gender: user.gender ?? '',
+      };
+    } catch (error) {
+      await this.dbClient.rollbackTransaction(client);
+      throw error;
+    }
+  }
+
 }
