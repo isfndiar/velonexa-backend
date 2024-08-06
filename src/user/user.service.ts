@@ -223,7 +223,7 @@ export class UserService {
   async getDetailbyUsername(username: string, userQuery: string): Promise<UserDetailbyUsernameResponse> {
     const client = await this.dbClient.startTransaction();
     try {
-      const user = await this.userRepository.getDetailbyUsername(client, username);
+      const user = await this.userRepository.getDetailbyUsername(client, userQuery);
   
       await this.dbClient.commitTransaction(client);
       return { 

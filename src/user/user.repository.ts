@@ -117,7 +117,7 @@ export class UserRepository {
 
   async getDetailbyUsername(client: PoolClient, username: string): Promise<UserEntity> {
     const query = {
-      text: `SELECT id, username, name, verify, profile_image, bio, email, gender FROM users WHERE username = $1`,
+      text: `SELECT * FROM users WHERE username = $1`,
       values: [username],
     };
   
