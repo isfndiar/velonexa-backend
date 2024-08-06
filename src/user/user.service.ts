@@ -13,7 +13,7 @@ import { UserUpdateDto } from './dto/user-update';
 import { extname } from 'path';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserAuth } from 'src/model/user.model';
-import { UserDetailResponse } from './dto/user-detail';
+import { UserDetailResponse, UserDetailbyUsernameResponse } from './dto/user-detail';
 
 @Injectable()
 export class UserService {
@@ -220,28 +220,27 @@ export class UserService {
     }
   }
 
-  async getDetailbyUsername(username: string, userQuery:string): Promise<UserDetailResponse> {
+  async getDetailbyUsername(username: string, userQuery: string): Promise<UserDetailbyUsernameResponse> {
     const client = await this.dbClient.startTransaction();
     try {
-      const user = await this.userRepository.getDetailbyUsername(
-        client,
-        username,
-      );
-
+      const user = await this.userRepository.getDetailbyUsername(client, username);
+  
       await this.dbClient.commitTransaction(client);
       return {
         username: user.username,
         name: user.name ?? '',
-        profileImage: user.profileImage ?? '',
-        verify: user.verify,
-        bio: user.bio ?? '',
-        email: user.email ?? '',
-        gender: user.gender ?? '',
+        isVerify: user.verify,
+        isFollow: userQuery === user.username ? 'true' : 'false',
+        profileImage:  user.profileImage ?? '',
+        countPost : user.countPost ?? 0,
+        countFollowers: user.countFollowers ?? 0,
+        countFollowing:  user.countFollowing ?? 0,
+        bio:  user.bio ?? '',
       };
     } catch (error) {
       await this.dbClient.rollbackTransaction(client);
       throw error;
     }
   }
-
+  
 }

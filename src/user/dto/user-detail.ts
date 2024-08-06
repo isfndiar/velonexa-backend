@@ -8,3 +8,15 @@ export class UserDetailResponse {
     gender: string;
   }
   
+  export class UserDetailbyUsernameResponse {
+    username: string;
+    name: string;
+    isVerify: string;
+    isFollow: string;
+    profileImage: string;
+    countPost : number;
+    countFollowers: number;
+    countFollowing: number;
+    bio: string;
+  }
+  

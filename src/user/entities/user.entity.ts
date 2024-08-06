@@ -12,6 +12,9 @@ export class UserEntity {
   phoneNumber?: string;
   isPrivate?: boolean;
   isNewUser?: boolean;
+  countPost?: number;
+  countFollowers?: number;
+  countFollowing?: number;
   createdAt?: Date;
   updatedAt?: Date;
 

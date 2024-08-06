@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -19,7 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerProfileOptions } from 'src/common/utils/multer';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserUpdateDto } from './dto/user-update';
-import { UserDetailResponse } from './dto/user-detail';
+import { UserDetailResponse, UserDetailbyUsernameResponse } from './dto/user-detail';
 import { UserAuth } from 'src/model/user.model';
 
 @Controller('/users')
@@ -111,24 +112,24 @@ export class UserController {
   }
 
   @Get('/users/:username')
-  async detailbyUsername(
-    @Auth() user: UserAuth, 
-    @Query() userQuery: { username: string },
-  ): Promise<WebResponse<UserDetailResponse>> {
-    try {
-      const data = await this.userService.getDetailbyUsername(user.username, userQuery.username);
-      return {
-        success: true,
-        data: data,
-        message: 'Success getting user details',
-      };
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-      return {
-        success: false,
-        data: null,
-        message: 'Failed to get user details',
-      };
-    }
-  }  
+async detailbyUsername(
+  @Auth() user: UserAuth, 
+  @Param('username') username: string,
+): Promise<WebResponse<UserDetailbyUsernameResponse>> {
+  try {
+    const data = await this.userService.getDetailbyUsername(user.username, username);
+    return {
+      success: true,
+      data: data,
+      message: 'Success getting user details',
+    };
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    return {
+      success: false,
+      data: null,
+      message: 'Failed to get user details',
+    };
+  }
+}
 }
