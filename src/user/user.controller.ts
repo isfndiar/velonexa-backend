@@ -5,7 +5,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -111,9 +110,9 @@ export class UserController {
     };
   }
 
-  @Get('/users/:username')
+  @Get('/:username')
 async detailbyUsername(
-  @Auth() user: UserAuth, 
+  @Auth() user: UserAuth,   
   @Param('username') username: string,
 ): Promise<WebResponse<UserDetailbyUsernameResponse>> {
   try {

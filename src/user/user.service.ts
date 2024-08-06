@@ -226,7 +226,7 @@ export class UserService {
       const user = await this.userRepository.getDetailbyUsername(client, username);
   
       await this.dbClient.commitTransaction(client);
-      return {
+      return { 
         username: user.username,
         name: user.name ?? '',
         isVerify: user.verify,
