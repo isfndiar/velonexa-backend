@@ -220,4 +220,28 @@ export class UserService {
     }
   }
 
+  async getDetailbyUsername(username: string, userQuery:string): Promise<UserDetailResponse> {
+    const client = await this.dbClient.startTransaction();
+    try {
+      const user = await this.userRepository.getDetailbyUsername(
+        client,
+        username,
+      );
+
+      await this.dbClient.commitTransaction(client);
+      return {
+        username: user.username,
+        name: user.name ?? '',
+        profileImage: user.profileImage ?? '',
+        verify: user.verify,
+        bio: user.bio ?? '',
+        email: user.email ?? '',
+        gender: user.gender ?? '',
+      };
+    } catch (error) {
+      await this.dbClient.rollbackTransaction(client);
+      throw error;
+    }
+  }
+
 }

@@ -4,6 +4,7 @@ import {
   Get,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -108,4 +109,26 @@ export class UserController {
       message: 'succes get Detail user',
     };
   }
+
+  @Get('/users/:username')
+  async detailbyUsername(
+    @Auth() user: UserAuth, 
+    @Query() userQuery: { username: string },
+  ): Promise<WebResponse<UserDetailResponse>> {
+    try {
+      const data = await this.userService.getDetailbyUsername(user.username, userQuery.username);
+      return {
+        success: true,
+        data: data,
+        message: 'Success getting user details',
+      };
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return {
+        success: false,
+        data: null,
+        message: 'Failed to get user details',
+      };
+    }
+  }  
 }
