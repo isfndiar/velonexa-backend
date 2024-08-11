@@ -147,14 +147,7 @@ export class UserRepository {
     };
     const result = await client.query(query);
 
-    const users: UserEntity[] = [];
-    if (!result.rowCount) {
-      return users;
-    }
-
-    for (let i = 0; i < result.rowCount; i++) {
-      users.push(mapUserToModel(result.rows[i]));
-    }
+    const users: UserEntity[] = result.rows.map((user) => mapUserToModel(user));
 
     return users;
   }
