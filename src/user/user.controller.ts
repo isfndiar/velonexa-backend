@@ -105,6 +105,8 @@ export class UserController {
         data: {},
         message: message,
       };
-    } catch (error) {}
+    } catch (error) {
+      throw error;
+    }
   }
 }
