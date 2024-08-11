@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerProfileOptions } from 'src/common/utils/multer';
 import { UserUpdateDto } from './dto/user-update';
 import { UserAuth } from 'src/model/user.model';
+import { UserGetFollowingResponse } from './dto/user-get-following';
 
 @Controller('/users')
 export class UserController {
@@ -104,6 +105,22 @@ export class UserController {
         success: true,
         data: {},
         message: message,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/:username/following')
+  async getFollowingByUsername(
+    @Param('username') username: string,
+  ): Promise<WebResponse<UserGetFollowingResponse[]>> {
+    try {
+      const result = await this.userService.getFollowingByUsername(username);
+      return {
+        success: true,
+        data: result,
+        message: 'Success get following user',
       };
     } catch (error) {
       throw error;
