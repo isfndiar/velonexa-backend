@@ -246,19 +246,12 @@ export class UserService {
         client,
         username,
       );
-      const users: UserGetFollowingResponse[] = [];
-      if (result.length < 1) {
-        return users;
-      }
-      for (let i = 0; i < result.length; i++) {
-        if (!result[i].profileImage) {
-          result[i].profileImage = 'http://image.com/';
-        }
-        if (!result[i].name) {
-          result[i].name = '';
-        }
-        users.push(result[i] as UserGetFollowingResponse);
-      }
+
+      const users: UserGetFollowingResponse[] = result.map((user) => ({
+        username: user.username,
+        name: user.name || '',
+        profileImage: user.profileImage || 'http://image.com/',
+      }));
       return users;
     } catch (error) {
       this.dbClient.rollbackTransaction(client);
