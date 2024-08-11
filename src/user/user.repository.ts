@@ -132,4 +132,30 @@ export class UserRepository {
 
     await client.query(query);
   }
+
+  async getFollowingByUsername(
+    client: PoolClient,
+    username: string,
+  ): Promise<UserEntity[]> {
+    const query = {
+      text: `SELECT u.username, u.profile_image, u.name 
+             FROM follows f 
+             JOIN users u ON f.following_id = u.id
+             JOIN users followers ON f.follower_id = followers.id
+             WHERE followers.username = $1`,
+      values: [username],
+    };
+    const result = await client.query(query);
+
+    const users: UserEntity[] = [];
+    if (!result.rowCount) {
+      return users;
+    }
+
+    for (let i = 0; i < result.rowCount; i++) {
+      users.push(mapUserToModel(result.rows[i]));
+    }
+
+    return users;
+  }
 }

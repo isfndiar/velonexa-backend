@@ -17,6 +17,7 @@ import { UserUpdateDto } from './dto/user-update';
 import { extname } from 'path';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserAuth } from 'src/model/user.model';
+import { UserGetFollowingResponse } from './dto/user-get-following';
 
 @Injectable()
 export class UserService {
@@ -232,6 +233,35 @@ export class UserService {
       }
     } catch (error) {
       await this.dbClient.rollbackTransaction(client);
+      throw error;
+    }
+  }
+
+  async getFollowingByUsername(
+    username: string,
+  ): Promise<UserGetFollowingResponse[]> {
+    const client = await this.dbClient.startTransaction();
+    try {
+      const result = await this.userRepository.getFollowingByUsername(
+        client,
+        username,
+      );
+      const users: UserGetFollowingResponse[] = [];
+      if (result.length < 1) {
+        return users;
+      }
+      for (let i = 0; i < result.length; i++) {
+        if (!result[i].profileImage) {
+          result[i].profileImage = 'http://image.com/';
+        }
+        if (!result[i].name) {
+          result[i].name = '';
+        }
+        users.push(result[i] as UserGetFollowingResponse);
+      }
+      return users;
+    } catch (error) {
+      this.dbClient.rollbackTransaction(client);
       throw error;
     }
   }
