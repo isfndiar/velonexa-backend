@@ -210,9 +210,8 @@ export class UserService {
         client,
         username,
       );
-
-      if (following == undefined) {
-        throw new HttpException('User not found', 404);
+      if (following === undefined) {
+        throw new HttpException('user not found', 404);
       }
 
       const follows: UserFollowsEntity = {
