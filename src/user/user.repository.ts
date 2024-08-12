@@ -151,4 +151,23 @@ export class UserRepository {
 
     return users;
   }
+
+  async getFollowerByUsername(
+    client: PoolClient,
+    username: string,
+  ): Promise<UserEntity[]> {
+    const query = {
+      text: `SELECT u.username, u.profile_image, u.name 
+             FROM follows f 
+             JOIN users u ON f.follower_id = u.id
+             JOIN users following ON f.following_id = following.id
+             where following.username = $1`,
+      values: [username],
+    };
+
+    const result = await client.query(query);
+
+    const user: UserEntity[] = result.rows.map((user) => mapUserToModel(user));
+    return user;
+  }
 }

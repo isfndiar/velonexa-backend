@@ -257,4 +257,24 @@ export class UserService {
       throw error;
     }
   }
+
+  async getFollowerByUsername(
+    username: string,
+  ): Promise<UserGetFollowingResponse[]> {
+    const client = await this.dbClient.startTransaction();
+    try {
+      const result = await this.userRepository.getFollowerByUsername(
+        client,
+        username,
+      );
+      return result.map((user) => ({
+        profileImage: user.profileImage || 'http://image.com/',
+        name: user.name || '',
+        username: user.username,
+      }));
+    } catch (error) {
+      this.dbClient.rollbackTransaction(client);
+      throw error;
+    }
+  }
 }
