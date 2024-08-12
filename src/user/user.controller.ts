@@ -126,4 +126,20 @@ export class UserController {
       throw error;
     }
   }
+
+  @Get('/:username/followers')
+  async getFollowerByUsername(
+    @Param('username') username: string,
+  ): Promise<WebResponse<UserGetFollowingResponse[]>> {
+    try {
+      const result = await this.userService.getFollowerByUsername(username);
+      return {
+        success: true,
+        data: result,
+        message: 'Success get follower user',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
