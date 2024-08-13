@@ -179,8 +179,6 @@ export class UserRepository {
     if (!result.rowCount) {
       throw new HttpException('user not found', 404);
     }
-    const user = mapUserToModel(result.rows[0]);
-
-    return new UserEntity(user);
+    return new UserEntity(mapUserToModel(result.rows[0]));
   }
 }
