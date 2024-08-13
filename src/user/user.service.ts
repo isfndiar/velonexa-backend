@@ -18,6 +18,7 @@ import { extname } from 'path';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserAuth } from 'src/model/user.model';
 import { UserGetFollowingResponse } from './dto/user-get-following';
+import { UserDetailResponse } from './dto/user-detail';
 
 @Injectable()
 export class UserService {
@@ -196,7 +197,6 @@ export class UserService {
         client,
         username,
       );
-
       if (following === undefined) {
         throw new HttpException('user not found', 404);
       }
@@ -256,6 +256,30 @@ export class UserService {
         name: user.name || '',
         username: user.username,
       }));
+    } catch (error) {
+      this.dbClient.rollbackTransaction(client);
+      throw error;
+    }
+  }
+
+  async getDetailUser(userAuth: UserAuth): Promise<UserDetailResponse> {
+    const client = await this.dbClient.startTransaction();
+    try {
+      const user = await this.userRepository.getDetailUser(
+        client,
+        userAuth.username,
+      );
+
+      await this.dbClient.commitTransaction(client);
+      return {
+        username: user.username,
+        name: user.name ?? '',
+        profileImage: user.profileImage ?? '',
+        verify: user.verify,
+        bio: user.bio ?? '',
+        email: user.email ?? '',
+        gender: user.gender ?? '',
+      };
     } catch (error) {
       this.dbClient.rollbackTransaction(client);
       throw error;
