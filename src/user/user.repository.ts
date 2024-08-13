@@ -147,9 +147,7 @@ export class UserRepository {
     };
     const result = await client.query(query);
 
-    const users: UserEntity[] = result.rows.map((user) => mapUserToModel(user));
-
-    return users;
+    return result.rows.map((user) => mapUserToModel(user));
   }
 
   async getFollowerByUsername(

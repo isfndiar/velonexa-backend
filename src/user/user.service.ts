@@ -22,6 +22,8 @@ import { UserGetFollowingResponse } from './dto/user-get-following';
 @Injectable()
 export class UserService {
   private bycryptSalt: number;
+  private readonly imageDefaultProfileUrl: string;
+  private readonly baseImageProfileUrl: string;
   constructor(
     @Inject(DATABASE_CLIENT) private dbClient: DatabaseClientPostgre,
     private userRepository: UserRepository,
@@ -30,6 +32,10 @@ export class UserService {
     private supabaseService: SupabaseService,
   ) {
     this.bycryptSalt = parseInt(this.configService.get('BCRYPT_SALT'));
+    this.imageDefaultProfileUrl = this.configService.get(
+      'IMAGE_PROFILE_DEFAULT_URL',
+    );
+    this.baseImageProfileUrl = this.configService.get('BASE_IMAGE_PROFILE_URL');
   }
 
   async createUser(user: UserCreateDto) {
@@ -143,6 +149,7 @@ export class UserService {
         client,
         userAuth.username,
       );
+      console.log(user);
       let image: string = '';
       if (file) {
         const uniqFileName = `${uuidv4()}${extname(file.originalname)}`;
@@ -152,7 +159,7 @@ export class UserService {
             file.buffer,
             file.mimetype,
           );
-          image = `https://zsacttrcsuuowlofqbnp.supabase.co/storage/v1/object/public/${data.fullPath}`;
+          image = `${this.baseImageProfileUrl}${data.fullPath}`;
         }
         if (user.profileImage) {
           const path = user.profileImage.split('/');
@@ -164,37 +171,15 @@ export class UserService {
             file.buffer,
             file.mimetype,
           );
-          image = `https://zsacttrcsuuowlofqbnp.supabase.co/storage/v1/object/public/${data.fullPath}`;
+          image = `${this.baseImageProfileUrl}${data.fullPath}`;
         }
       }
-
+      console.log(image);
       const data: UserUpdateEntity = {
         id: user.id,
+        ...userData,
+        ...(image ? { profileImage: image } : {}),
       };
-      if (userData.bio) {
-        data.bio = userData.bio;
-      }
-      if (userData.email) {
-        data.email = userData.email;
-      }
-      if (userData.gender) {
-        data.gender = userData.gender;
-      }
-      if (userData.password) {
-        data.password = userData.password;
-      }
-      if (userData.name) {
-        data.name = userData.name;
-      }
-      if (userData.username) {
-        data.username = userData.username;
-      }
-      if (userData.phoneNumber) {
-        data.phoneNumber = userData.phoneNumber;
-      }
-      if (image) {
-        data.profileImage = image;
-      }
 
       await this.userRepository.updateById(client, data);
       await this.dbClient.commitTransaction(client);
@@ -211,6 +196,7 @@ export class UserService {
         client,
         username,
       );
+
       if (following === undefined) {
         throw new HttpException('user not found', 404);
       }
@@ -245,13 +231,11 @@ export class UserService {
         client,
         username,
       );
-
-      const users: UserGetFollowingResponse[] = result.map((user) => ({
+      return result.map((user) => ({
         username: user.username,
         name: user.name || '',
-        profileImage: user.profileImage || 'http://image.com/',
+        profileImage: user.profileImage || this.imageDefaultProfileUrl,
       }));
-      return users;
     } catch (error) {
       this.dbClient.rollbackTransaction(client);
       throw error;
@@ -268,7 +252,7 @@ export class UserService {
         username,
       );
       return result.map((user) => ({
-        profileImage: user.profileImage || 'http://image.com/',
+        profileImage: user.profileImage || this.imageDefaultProfileUrl,
         name: user.name || '',
         username: user.username,
       }));
