@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import {
   UserCreateEntity,
   UserEntity,
+  UserFollowsEntity,
   UserUpdateEntity,
 } from './entities/user.entity';
 import { columnMapUpdate, mapUserToModel } from 'src/common/utils/transform';
@@ -45,7 +46,7 @@ export class UserRepository {
     const result = await client.query(query);
 
     if (!result.rowCount) {
-      throw new HttpException('Password or Username is wrong', 404);
+      return undefined;
     }
 
     return new UserEntity(result.rows[0]);
@@ -99,6 +100,74 @@ export class UserRepository {
 
     await client.query(query);
   }
+
+  async isFollow(
+    client: PoolClient,
+    follows: UserFollowsEntity,
+  ): Promise<boolean> {
+    const query = {
+      text: `SELECT follower_id, following_id FROM follows WHERE follower_id = $1 AND following_id = $2`,
+      values: [follows.followerId, follows.followingId],
+    };
+    const result = await client.query(query);
+    if (result.rowCount) {
+      return true;
+    }
+    return false;
+  }
+
+  async follow(client: PoolClient, follows: UserFollowsEntity) {
+    const query = {
+      text: `INSERT INTO follows (follower_id, following_id) VALUES ( $1, $2) ON CONFLICT DO NOTHING`,
+      values: [follows.followerId, follows.followingId],
+    };
+
+    await client.query(query);
+  }
+  async unFollow(client: PoolClient, follows: UserFollowsEntity) {
+    const query = {
+      text: `DELETE FROM follows WHERE follower_id = $1 AND following_id = $2`,
+      values: [follows.followerId, follows.followingId],
+    };
+
+    await client.query(query);
+  }
+
+  async getFollowingByUsername(
+    client: PoolClient,
+    username: string,
+  ): Promise<UserEntity[]> {
+    const query = {
+      text: `SELECT u.username, u.profile_image, u.name 
+             FROM follows f 
+             JOIN users u ON f.following_id = u.id
+             JOIN users followers ON f.follower_id = followers.id
+             WHERE followers.username = $1`,
+      values: [username],
+    };
+    const result = await client.query(query);
+
+    return result.rows.map((user) => mapUserToModel(user));
+  }
+
+  async getFollowerByUsername(
+    client: PoolClient,
+    username: string,
+  ): Promise<UserEntity[]> {
+    const query = {
+      text: `SELECT u.username, u.profile_image, u.name 
+             FROM follows f 
+             JOIN users u ON f.follower_id = u.id
+             JOIN users following ON f.following_id = following.id
+             where following.username = $1`,
+      values: [username],
+    };
+
+    const result = await client.query(query);
+
+    return result.rows.map((user) => mapUserToModel(user));
+  }
+
   async getDetailUser(client: PoolClient, username: string) {
     const query = {
       text: `SELECT id, username, name, verify, profile_image, bio, email, gender FROM users WHERE username = $1`,
@@ -115,20 +184,22 @@ export class UserRepository {
     return new UserEntity(user);
   }
 
-  async getDetailbyUsername(client: PoolClient, username: string): Promise<UserEntity> {
+  async getDetailbyUsername(
+    client: PoolClient,
+    username: string,
+  ): Promise<UserEntity> {
     const query = {
       text: `SELECT * FROM users WHERE username = $1`,
       values: [username],
     };
-  
+
     const result = await client.query(query);
-  
+
     if (!result.rowCount) {
       throw new HttpException('user not found', 404);
     }
     const user = mapUserToModel(result.rows[0]);
-  
+
     return new UserEntity(user);
   }
-  
 }

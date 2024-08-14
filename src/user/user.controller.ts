@@ -17,17 +17,17 @@ import { AuthSkip } from 'src/common/decorator/metadata';
 import { UserCurrentResponse } from './dto/user-current';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerProfileOptions } from 'src/common/utils/multer';
-import { SupabaseService } from 'src/supabase/supabase.service';
 import { UserUpdateDto } from './dto/user-update';
-import { UserDetailResponse, UserDetailbyUsernameResponse } from './dto/user-detail';
+import {
+  UserDetailResponse,
+  UserDetailbyUsernameResponse,
+} from './dto/user-detail';
 import { UserAuth } from 'src/model/user.model';
+import { UserGetFollowingResponse } from './dto/user-get-following';
 
 @Controller('/users')
 export class UserController {
-  constructor(
-    private userService: UserService,
-    private readonly supabaseService: SupabaseService,
-  ) {}
+  constructor(private userService: UserService) {}
 
   @Get()
   @AuthSkip()
@@ -98,11 +98,60 @@ export class UserController {
     }
   }
 
+  @Post('/:username/follows')
+  async follows(
+    @Auth() user: UserAuth,
+    @Param('username') username: string,
+  ): Promise<WebResponse<object>> {
+    try {
+      const message = await this.userService.followsByUsername(user, username);
+      return {
+        success: true,
+        data: {},
+        message: message,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/:username/following')
+  async getFollowingByUsername(
+    @Param('username') username: string,
+  ): Promise<WebResponse<UserGetFollowingResponse[]>> {
+    try {
+      const result = await this.userService.getFollowingByUsername(username);
+      return {
+        success: true,
+        data: result,
+        message: 'Success get following user',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/:username/followers')
+  async getFollowerByUsername(
+    @Param('username') username: string,
+  ): Promise<WebResponse<UserGetFollowingResponse[]>> {
+    try {
+      const result = await this.userService.getFollowerByUsername(username);
+      return {
+        success: true,
+        data: result,
+        message: 'Success get follower user',
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('/me/settings')
   async detailUser(
     @Auth() user: UserAuth,
   ): Promise<WebResponse<UserDetailResponse>> {
-    const data = await this.userService.getDetailUser(user.username, );
+    const data = await this.userService.getDetailUser(user);
     return {
       success: true,
       data: data,
@@ -111,24 +160,27 @@ export class UserController {
   }
 
   @Get('/:username')
-async detailbyUsername(
-  @Auth() user: UserAuth,   
-  @Param('username') username: string,
-): Promise<WebResponse<UserDetailbyUsernameResponse>> {
-  try {
-    const data = await this.userService.getDetailbyUsername(user.username, username);
-    return {
-      success: true,
-      data: data,
-      message: 'Success getting user details',
-    };
-  } catch (error) {
-    console.error('Error fetching user details:', error);
-    return {
-      success: false,
-      data: null,
-      message: 'Failed to get user details',
-    };
+  async detailbyUsername(
+    @Auth() user: UserAuth,
+    @Param('username') username: string,
+  ): Promise<WebResponse<UserDetailbyUsernameResponse>> {
+    try {
+      const data = await this.userService.getDetailbyUsername(
+        user.username,
+        username,
+      );
+      return {
+        success: true,
+        data: data,
+        message: 'Success getting user details',
+      };
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return {
+        success: false,
+        data: null,
+        message: 'Failed to get user details',
+      };
+    }
   }
-}
 }
