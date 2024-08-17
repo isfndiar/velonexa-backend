@@ -24,7 +24,7 @@ import { UserDetailResponse } from './dto/user-detail';
 export class UserService {
   private bycryptSalt: number;
   private readonly imageDefaultProfileUrl: string;
-  private readonly baseImageProfileUrl: string;
+  private readonly baseImageUrl: string;
   constructor(
     @Inject(DATABASE_CLIENT) private dbClient: DatabaseClientPostgre,
     private userRepository: UserRepository,
@@ -36,7 +36,7 @@ export class UserService {
     this.imageDefaultProfileUrl = this.configService.get(
       'IMAGE_PROFILE_DEFAULT_URL',
     );
-    this.baseImageProfileUrl = this.configService.get('BASE_IMAGE_PROFILE_URL');
+    this.baseImageUrl = this.configService.get('BASE_IMAGE_URL');
   }
 
   async createUser(user: UserCreateDto) {
@@ -160,7 +160,7 @@ export class UserService {
             file.buffer,
             file.mimetype,
           );
-          image = `${this.baseImageProfileUrl}${data.fullPath}`;
+          image = `${this.baseImageUrl}${data.fullPath}`;
         }
         if (user.profileImage) {
           const path = user.profileImage.split('/');
@@ -172,7 +172,7 @@ export class UserService {
             file.buffer,
             file.mimetype,
           );
-          image = `${this.baseImageProfileUrl}${data.fullPath}`;
+          image = `${this.baseImageUrl}${data.fullPath}`;
         }
       }
       console.log(image);

@@ -21,7 +21,7 @@ export const multerProfileOptions: MulterOptions = {
 
 export const multerMediaOptions: MulterOptions = {
   storage: memoryStorage(),
-  limits: { fileSize: 1024 * 1024 * 5 },
+  limits: { fileSize: 1024 * 1024 * 5, files: 10 },
   fileFilter(req, file, callback) {
     const type = req.query.type;
     if (type == 'posts') {
@@ -37,7 +37,7 @@ export const multerMediaOptions: MulterOptions = {
     } else if (type == 'reels') {
       if (!file.mimetype.match(/\/mp4$/)) {
         return callback(
-          new HttpException('Only mp4 files are allowed for posts', 400),
+          new HttpException('Only mp4 files are allowed for reels', 400),
           false,
         );
       }

@@ -14,6 +14,6 @@ declare namespace NodeJS {
     SUPABASE_URL: string;
     SUPABASE_KEY: string;
     IMAGE_PROFILE_DEFAULT_URL: string;
-    BASE_IMAGE_PROFILE_URL: string;
+    BASE_IMAGE_URL: string;
   }
 }

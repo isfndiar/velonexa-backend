@@ -20,12 +20,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
+    let message =
       exception instanceof HttpException
         ? exception.message
         : 'Internal Server Error';
 
     const status = statusException(statusCode);
+    if (statusCode == 413) {
+      message = 'file size too large maximum 5mb';
+    }
 
     res.status(statusCode).json({
       success: false,

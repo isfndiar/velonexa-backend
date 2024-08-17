@@ -9,5 +9,6 @@ import { SupabaseModule } from 'src/supabase/supabase.module';
   providers: [UserService, UserRepository],
   imports: [DatabaseModule, SupabaseModule],
   controllers: [UserController],
+  exports: [UserRepository],
 })
 export class UserModule {}

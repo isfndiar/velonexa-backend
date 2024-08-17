@@ -9,6 +9,8 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { AuthGuard } from './common/guards/auth.guard';
 import { MulterModule } from '@nestjs/platform-express';
 import { SupabaseModule } from './supabase/supabase.module';
+import { MediaModule } from './media/media.module';
+import { PostModule } from './media/post/post.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { SupabaseModule } from './supabase/supabase.module';
     }),
     MulterModule,
     SupabaseModule,
+    MediaModule,
+    PostModule,
   ],
   controllers: [],
   providers: [

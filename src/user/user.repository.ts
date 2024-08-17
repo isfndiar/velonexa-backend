@@ -37,8 +37,9 @@ export class UserRepository {
   async getByUsername(
     client: PoolClient,
     username: string,
-  ): Promise<UserEntity> {
+  ): Promise<UserEntity | undefined> {
     const query = {
+      name: 'fetch user',
       text: `SELECT id, username, password FROM users WHERE username = $1`,
       values: [username],
     };
@@ -73,9 +74,7 @@ export class UserRepository {
     if (!result.rowCount) {
       throw new HttpException('user not found', 404);
     }
-    const user = mapUserToModel(result.rows[0]);
-
-    return new UserEntity(user);
+    return new UserEntity(mapUserToModel(result.rows[0]));
   }
 
   async updateById(client: PoolClient, users: UserUpdateEntity) {

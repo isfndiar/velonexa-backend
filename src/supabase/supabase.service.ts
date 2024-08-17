@@ -41,4 +41,28 @@ export class SupabaseService {
     }
     return true;
   }
+
+  async uploudMedia(filename: string, fileBuffer: Buffer, contentType: string) {
+    const { data, error } = await this.supabase.storage
+      .from('Velonexa')
+      .upload(`media-posts/${filename}`, fileBuffer, {
+        contentType,
+      });
+
+    if (error) {
+      throw new HttpException('upload failed', 400);
+    }
+    return data;
+  }
+
+  async deleteMedia(fileName: string) {
+    const { error } = await this.supabase.storage
+      .from('Velonexa')
+      .remove([`media-posts/${fileName}`]);
+
+    if (error) {
+      throw new HttpException('delete failed', 400);
+    }
+    return true;
+  }
 }
