@@ -21,6 +21,11 @@ async function bootstrap() {
       },
     }),
   );
+  app.enableCors({
+    origin: ['localhost:3000', 'localhost'], // Ganti dengan domain yang diizinkan
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3001;
 
