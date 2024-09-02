@@ -39,7 +39,7 @@ export class UserRepository {
     username: string,
   ): Promise<UserEntity | undefined> {
     const query = {
-      name: 'fetch user',
+      // name: 'fetch user',
       text: `SELECT id, username, password FROM users WHERE username = $1`,
       values: [username],
     };
