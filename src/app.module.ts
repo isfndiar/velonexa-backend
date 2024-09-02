@@ -18,7 +18,7 @@ import { PostModule } from './media/post/post.module';
     DatabaseModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: `.env`,
     }),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService): JwtModuleOptions => ({
