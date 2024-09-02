@@ -28,6 +28,7 @@ async function bootstrap() {
     await app.listen(port);
     const appUrl = await app.getUrl();
     console.log(`Application is running on: ${appUrl}`);
+    console.log('Jalan bro, hayuk');
   } catch (error) {
     console.error('Error starting application:', error);
   }
